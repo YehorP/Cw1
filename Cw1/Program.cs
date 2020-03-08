@@ -58,8 +58,6 @@ namespace Cw1
                         Console.WriteLine("No adress were found");
                     }
                 }
-
-                httpClient.Dispose();
             }
             catch (InvalidOperationException wrongReq)
             {
@@ -72,8 +70,9 @@ namespace Cw1
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                throw;
             }
+            
+            httpClient.Dispose();
         }
     }
 }
