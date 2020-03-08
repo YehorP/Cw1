@@ -36,14 +36,21 @@ namespace Cw1
                     var matches = regex.Matches(htmlContent);
                     if (matches.Count != 0)
                     {
-                        List<String> repeat = new List<String>();
+                        //List<String> repeat = new List<String>();
+                        HashSet<String> nonRepeat=new HashSet<string>();
                         foreach (var item in matches)
                         {
-                            if (!repeat.Contains(item.ToString()))
-                            {
-                                repeat.Add(item.ToString());
-                                Console.WriteLine(item.ToString());
-                            }
+                            // if (!repeat.Contains(item.ToString()))
+                            // {
+                            //     repeat.Add(item.ToString());
+                            //     Console.WriteLine(item.ToString());
+                            // }
+                            nonRepeat.Add(item.ToString());
+                        }
+
+                        foreach (var text in nonRepeat)
+                        {
+                            Console.WriteLine(text);
                         }
                     }
                     else
