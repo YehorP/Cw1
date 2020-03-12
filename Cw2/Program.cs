@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.Text.Json;
+using System.Xml.Serialization;
 
 namespace Cw2
 {
@@ -7,7 +9,24 @@ namespace Cw2
     {
         static void Main(string[] args)
         {
-            var path = @"D:\Cw1\Cw2\dane.csv";
+            if (args.Length != 3)
+            {
+
+
+
+            }
+            else
+            {
+                var defaultpath = @"W:\Cw1\Cw2\dane.csv";
+                var result = @".\..\..\..\result.xml";
+                Uczelnia ucz = new Uczelnia(File.ReadLines(defaultpath));
+                using (FileStream fs = new FileStream(result, FileMode.Create))
+                {
+                    XmlSerializer serializer = new XmlSerializer(typeof(Uczelnia));
+                    serializer.Serialize(fs, ucz);
+                }
+            }
+            //var dest2 = @".\..\..\..\res2.json";
 
             /*var lines = File.ReadLines(path);
 
@@ -22,7 +41,11 @@ namespace Cw2
             Console.WriteLine(now);
             var today = DateTime.Today;
             Console.WriteLine(today.ToShortDateString());*/
-            Uczelnia ucz = new Uczelnia(File.ReadLines(path));
+
+
+
+            //File.WriteAllText(dest2, JsonSerializer.Serialize<Uczelnia>(ucz));
+            //Console.WriteLine(Directory.GetCurrentDirectory());
         }
     }
 }

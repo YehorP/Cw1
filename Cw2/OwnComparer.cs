@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Cw2
 {
-    class OwnComparer : IEqualityComparer<Student>
+    public class OwnComparer : IEqualityComparer<Student>
     {
         public bool Equals(Student x, Student y)
         {
