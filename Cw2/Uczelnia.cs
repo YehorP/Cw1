@@ -34,12 +34,15 @@ namespace Cw2
             Student tmpStudent;
             int index;
             ActiveStudy tmpStudy;
+            List<String> tmpList;
            foreach(var line in lines)
             {
                 cutData = line.Split(",");
-                if (cutData.Length == 9)
+                tmpList = new List<string>(cutData);
+                if (cutData.Length == 9 && !tmpList.Contains("") && !tmpList.Contains(" "))
                 {
                     tmpStudent = new Student(cutData);
+                    
                     if (studenci.Add(tmpStudent))
                     {
                         tmpStudy = new ActiveStudy(tmpStudent.studies.name);
@@ -51,13 +54,12 @@ namespace Cw2
                         }
                         else
                         {
-
                             activeStudies[index].numberOfStudents += 1;
                         }
                     }
                 }
                 else {
-                    fs.Write(line+"\n");
+                    fs.Write(line+ System.Environment.NewLine);
                     fs.Flush();
                 }
             }
