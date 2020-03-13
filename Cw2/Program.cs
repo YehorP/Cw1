@@ -9,22 +9,30 @@ namespace Cw2
     {
         static void Main(string[] args)
         {
-            if (args.Length == 3 && File.Exists(args[0]))
+            if (args.Length == 3)
             {
-                if(args[2]=="xml" || args[2] == ".xml")
+                if (File.Exists(args[0]))
                 {
-                    Uczelnia ucz = new Uczelnia(File.ReadLines(args[0]));
-                    using (FileStream fs = new FileStream(args[1], FileMode.Create))
+                    if (args[2] == "xml" || args[2] == ".xml")
                     {
-                        XmlSerializer serializer = new XmlSerializer(typeof(Uczelnia));
-                        serializer.Serialize(fs, ucz);
-                    }
+                        Uczelnia ucz = new Uczelnia(File.ReadLines(args[0]));
+                        using (FileStream fs = new FileStream(args[1], FileMode.Create))
+                        {
+                            XmlSerializer serializer = new XmlSerializer(typeof(Uczelnia));
+                            serializer.Serialize(fs, ucz);
+                        }
 
+                    }
+                    else if (args[2] == "json" || args[2] == ".json")
+                    {
+                        var container = new { uczelnia = new Uczelnia(File.ReadLines(args[0])) };
+                        File.WriteAllText(args[1], JsonSerializer.Serialize(container));
+                    }
                 }
-                else if(args[2] == "json" || args[2] == ".json")
+                else
                 {
-                    var container = new { uczelnia = new Uczelnia(File.ReadLines(args[0]))};
-                    File.WriteAllText(args[1], JsonSerializer.Serialize(container));
+                    File.WriteAllText(@".\..\..\..\log.txt", args[0]+" source file does not exist");
+                    throw new Exception(args[0]+" does not exists");
                 }
             }
             else
