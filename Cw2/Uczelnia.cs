@@ -29,7 +29,7 @@ namespace Cw2
             this.author = "Yehor Pakhomov";
             this.studenci = new HashSet<Student>(new OwnComparer());
             this.activeStudies = new List<ActiveStudy>();
-            this.fs = new StreamWriter(@".\..\..\..\log.txt");
+            this.fs = new StreamWriter(@"log.txt");
             string[] cutData;
             Student tmpStudent;
             int index;
@@ -59,7 +59,7 @@ namespace Cw2
                     }
                 }
                 else {
-                    fs.Write(line+ System.Environment.NewLine);
+                    fs.Write(line+" (is a wrong record)"+ System.Environment.NewLine);
                     fs.Flush();
                 }
             }

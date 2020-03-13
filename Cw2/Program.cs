@@ -31,15 +31,16 @@ namespace Cw2
                 }
                 else
                 {
-                    File.WriteAllText(@".\..\..\..\log.txt", args[0]+" source file does not exist");
+                    File.WriteAllText(@"log.txt", args[0]+" source file does not exist");
                     throw new Exception(args[0]+" does not exists");
                 }
             }
             else
             {
-                var defaultpath = @".\..\..\..\dane.csv";
-                var result = @".\..\..\..\result.xml";
+                var defaultpath = @"dane.csv";
+                var result = @"result.xml";
 
+                
                 Uczelnia ucz = new Uczelnia(File.ReadLines(defaultpath));
                 using (FileStream fs = new FileStream(result, FileMode.Create))
                 {
