@@ -20,13 +20,22 @@ namespace Cw5.Controllers
             this.dbService = dbService;
         }
 
+        [HttpPost("{promotions}")]
+        public IActionResult PromoteStudents(PromoteStudentRequest request)
+        {
+            PromoteStudentResponse response = dbService.PromoteStudent(request);
+            if (response == null)
+                return NotFound("Wrong data was passed");
+            else
+                return StatusCode(201,response);
+        }
         [HttpPost]
 
         public IActionResult EnrollStudent(EnrollStudentRequest request)
         {
             EnrollStudentResponse response=dbService.EnrollStudent(request);
             if (response == null)
-                return BadRequest("Wrong data was passed");
+                return NotFound("Wrong data was passed");
             else
                 return StatusCode(201,response);
         }

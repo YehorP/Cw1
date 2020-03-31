@@ -3,6 +3,7 @@ using Cw5.DTOs.Responses;
 using Cw5.Models;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,15 +13,51 @@ namespace Cw5.Services
     public class SqlServerDbService : IStudentsDbService
     {
         private const string ConString = "Data Source=db-mssql;Initial Catalog=s18776;Integrated Security=True";
-        public IEnumerable<Student> GetStudents()
+    
+        public PromoteStudentResponse PromoteStudent(PromoteStudentRequest request)
         {
-            //...sql con
-            return null;
-        }
-        public void PromoteStudent()
-        {
-
-        }
+            using (SqlConnection con = new SqlConnection(ConString))
+            using (SqlCommand com = new SqlCommand())
+            {
+                try
+                {
+                    com.Connection = con;
+                    com.CommandText = "select * from Enrollment inner join Studies on Enrollment.IdStudy=Studies.IdStudy where Name=@StudyName and Semester=@Semester";
+                    com.Parameters.AddWithValue("@StudyName", request.Studies);
+                    com.Parameters.AddWithValue("@Semester", request.Semester);
+                    con.Open();
+                    SqlDataReader reader = com.ExecuteReader();
+                    if (!reader.Read())
+                    {
+                        return null;
+                    }
+                    reader.Close();
+                    com.Parameters.Clear();
+                    com.CommandText = "PromoteStudents";
+                    com.CommandType = CommandType.StoredProcedure;
+                    com.Parameters.AddWithValue("@Study", request.Studies);
+                    com.Parameters.AddWithValue("@Semester", request.Semester);
+                    reader = com.ExecuteReader();
+                    if (reader.Read()) {
+                        PromoteStudentResponse response = new PromoteStudentResponse();
+                        response.IdEnrollment = int.Parse(reader["IdEnrollment"].ToString());
+                        response.Semester= int.Parse(reader["Semester"].ToString());
+                        response.Study = reader["Name"].ToString();
+                        response.StartDate = DateTime.Parse(reader["StartDate"].ToString());
+                        reader.Close();
+                        return response;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
+                catch(SqlException ex)
+                {
+                    return null;
+                }
+            }
+         }
 
         public EnrollStudentResponse EnrollStudent(EnrollStudentRequest request)
         {

@@ -10,10 +10,8 @@ namespace Cw5.Services
 {
     public interface IStudentsDbService
     {
-        IEnumerable<Student> GetStudents();
-
         EnrollStudentResponse EnrollStudent(EnrollStudentRequest req);
-        void PromoteStudent();
+        PromoteStudentResponse PromoteStudent(PromoteStudentRequest req);
 
     }
 }
