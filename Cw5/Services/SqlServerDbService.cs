@@ -13,14 +13,42 @@ namespace Cw5.Services
     public class SqlServerDbService : IStudentsDbService
     {
         private const string ConString = "Data Source=db-mssql;Initial Catalog=s18776;Integrated Security=True";
-    
-        public PromoteStudentResponse PromoteStudent(PromoteStudentRequest request)
+
+        public bool IsStudentExists(String StudentIndexNumber)
         {
+            try
+            {
             using (SqlConnection con = new SqlConnection(ConString))
             using (SqlCommand com = new SqlCommand())
+            {              
+                    com.Connection = con;
+                    com.CommandText = "Select * from Student where IndexNumber=@index";
+                    com.Parameters.AddWithValue("@index", StudentIndexNumber);
+                    con.Open();
+                    SqlDataReader reader = com.ExecuteReader();
+
+                    if (reader.Read())
+                    {
+                        reader.Close();
+                        return true;
+                    }
+                    reader.Close();
+                    return false;
+                }
+            }
+            catch (Exception ex)
             {
-                try
-                {
+                return false;
+            }
+        }
+        public PromoteStudentResponse PromoteStudent(PromoteStudentRequest request)
+        {
+            try
+            {
+                using (SqlConnection con = new SqlConnection(ConString))
+                using (SqlCommand com = new SqlCommand())
+            {
+               
                     com.Connection = con;
                     com.CommandText = "select * from Enrollment inner join Studies on Enrollment.IdStudy=Studies.IdStudy where Name=@StudyName and Semester=@Semester";
                     com.Parameters.AddWithValue("@StudyName", request.Studies);
@@ -50,23 +78,23 @@ namespace Cw5.Services
                     else
                     {
                         return null;
-                    }
-                }
-                catch(SqlException ex)
-                {
-                    return null;
+                    }              
                 }
             }
-         }
+            catch (Exception ex)
+            {
+                return null;
+            }
+        }
 
         public EnrollStudentResponse EnrollStudent(EnrollStudentRequest request)
         {
-
-            using (SqlConnection con = new SqlConnection(ConString))
-            using (SqlCommand com = new SqlCommand())
+            try
             {
-               try
+                using (SqlConnection con = new SqlConnection(ConString))
+                using (SqlCommand com = new SqlCommand())
                 {
+
                     com.Connection = con;
                     com.CommandText = "Select * from Student where IndexNumber=@index";
                     com.Parameters.AddWithValue("@index", request.IndexNumber);
@@ -77,9 +105,9 @@ namespace Cw5.Services
                         return null;
 
                     reader.Close();
+                   
                     com.CommandText = "select IdStudy from Studies where Name=@StudyName";
                     com.Parameters.AddWithValue("@StudyName", request.Studies);
-                    
                     reader = com.ExecuteReader();
                     if (!reader.Read()) {
                         return null;
@@ -99,55 +127,25 @@ namespace Cw5.Services
                     }
                     reader.Close();
                     SqlTransaction transaction= con.BeginTransaction();
-                try
-                {
-                    
-                        com.Transaction = transaction;
+                        try
+                        {                    
+                            com.Transaction = transaction;
                         
-                        EnrollStudentResponse response = new EnrollStudentResponse();
-                        if (dataPresent)  
-                        {
-                            com.CommandText = "Insert into Student Values(@IndexNumber,@FirstName,@LastName,@BirthDate,@IdEnrollment)";
-                            com.Parameters.AddWithValue("@IndexNumber", request.IndexNumber);
-                            com.Parameters.AddWithValue("@FirstName", request.FirstName);
-                            com.Parameters.AddWithValue("@LastName", request.LastName);
-                            com.Parameters.AddWithValue("@BirthDate", request.Birthdate);
-                            com.Parameters.AddWithValue("@IdEnrollment", IdEnrollment);
-                            com.ExecuteNonQuery();
+                            EnrollStudentResponse response = new EnrollStudentResponse();
+                            if (dataPresent)  
+                                {
+                                    com.CommandText = "Insert into Student Values(@IndexNumber,@FirstName,@LastName,@BirthDate,@IdEnrollment)";
+                                    com.Parameters.AddWithValue("@IndexNumber", request.IndexNumber);
+                                    com.Parameters.AddWithValue("@FirstName", request.FirstName);
+                                    com.Parameters.AddWithValue("@LastName", request.LastName);
+                                    com.Parameters.AddWithValue("@BirthDate", request.Birthdate);
+                                    com.Parameters.AddWithValue("@IdEnrollment", IdEnrollment);
+                                    com.ExecuteNonQuery();
 
-                            com.Parameters.Clear();
-                            com.CommandText = "select IdEnrollment,Semester,StartDate,Name from Enrollment inner join Studies on Enrollment.IdStudy=Studies.IdStudy where IdEnrollment=@IdEnrollment";
-                            com.Parameters.AddWithValue("@IdEnrollment", IdEnrollment);
-                            reader = com.ExecuteReader();
-                            if (reader.Read())
-                            {
-                                response.IdEnrollment = int.Parse(reader["IdEnrollment"].ToString());
-                                response.Semester = int.Parse(reader["Semester"].ToString());
-                                response.Study = reader["Name"].ToString();
-                                response.StartDate = DateTime.Parse(reader["StartDate"].ToString());
-                                reader.Close();
-                                transaction.Commit();
-                                transaction.Dispose();
-                                return response;
-                            }
-                            return null;
-                        }
-                        else
-                        {
-                            reader.Close();
-                            com.CommandText = "Insert into Enrollment Values((Select ISNULL(Max(IdEnrollment),0)+1 from Enrollment),1,@IdStudy,(SELECT CONVERT(date, getdate())))";
-                            com.Parameters.AddWithValue("@IdStudy", StudyId);
-                            if (com.ExecuteNonQuery() == 1)
-                            {
-                                com.CommandText = "Insert into Student Values(@IndexNumber,@FirstName,@LastName,@BirthDate,(Select Max(IdEnrollment) from Enrollment))";
-                                com.Parameters.AddWithValue("@IndexNumber", request.IndexNumber);
-                                com.Parameters.AddWithValue("@FirstName", request.FirstName);
-                                com.Parameters.AddWithValue("@LastName", request.LastName);
-                                com.Parameters.AddWithValue("@BirthDate", request.Birthdate);
-                                com.ExecuteNonQuery();
-
-                                com.CommandText = "select IdEnrollment,Semester,StartDate,Name from Enrollment inner join Studies on Enrollment.IdStudy=Studies.IdStudy where IdEnrollment=(Select MAX(IdEnrollment) from Enrollment)";
-                                reader = com.ExecuteReader();
+                                    com.Parameters.Clear();
+                                    com.CommandText = "select IdEnrollment,Semester,StartDate,Name from Enrollment inner join Studies on Enrollment.IdStudy=Studies.IdStudy where IdEnrollment=@IdEnrollment";
+                                    com.Parameters.AddWithValue("@IdEnrollment", IdEnrollment);
+                                    reader = com.ExecuteReader();
                                 if (reader.Read())
                                 {
                                     response.IdEnrollment = int.Parse(reader["IdEnrollment"].ToString());
@@ -159,23 +157,54 @@ namespace Cw5.Services
                                     transaction.Dispose();
                                     return response;
                                 }
-                                return null;   
-                            }
-                            else {
                                 return null;
                             }
+                            else
+                            {
+                                reader.Close();
+                                com.CommandText = "Insert into Enrollment Values((Select ISNULL(Max(IdEnrollment),0)+1 from Enrollment),1,@IdStudy,(SELECT CONVERT(date, getdate())))";
+                                com.Parameters.AddWithValue("@IdStudy", StudyId);
+                                if (com.ExecuteNonQuery() == 1)
+                                {
+                                    com.CommandText = "Insert into Student Values(@IndexNumber,@FirstName,@LastName,@BirthDate,(Select Max(IdEnrollment) from Enrollment))";
+                                    com.Parameters.AddWithValue("@IndexNumber", request.IndexNumber);
+                                    com.Parameters.AddWithValue("@FirstName", request.FirstName);
+                                    com.Parameters.AddWithValue("@LastName", request.LastName);
+                                    com.Parameters.AddWithValue("@BirthDate", request.Birthdate);
+                                    com.ExecuteNonQuery();
+
+                                    com.CommandText = "select IdEnrollment,Semester,StartDate,Name from Enrollment inner join Studies on Enrollment.IdStudy=Studies.IdStudy where IdEnrollment=(Select MAX(IdEnrollment) from Enrollment)";
+                                    reader = com.ExecuteReader();
+                                    if (reader.Read())
+                                    {
+                                        response.IdEnrollment = int.Parse(reader["IdEnrollment"].ToString());
+                                        response.Semester = int.Parse(reader["Semester"].ToString());
+                                        response.Study = reader["Name"].ToString();
+                                        response.StartDate = DateTime.Parse(reader["StartDate"].ToString());
+                                        reader.Close();
+                                        transaction.Commit();
+                                        transaction.Dispose();
+                                        return response;
+                                    }
+                                    return null;   
+                                }
+                                else {
+                                    return null;
+                                }
+                            }
                         }
-                    }
-                    catch (Exception ex2) {
-                        transaction.Rollback();
-                        transaction.Dispose();
-                        return null;
+                        catch (Exception ex2) {
+                            transaction.Rollback();
+                            transaction.Dispose();
+                            return null;
+                        }
+                
                     }
                 }
-                catch (SqlException ex) {
+                catch (Exception ex)
+                {
                     return null;
                 }
-            }            
+            }
         }
     }
-}

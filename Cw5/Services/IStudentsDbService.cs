@@ -12,6 +12,6 @@ namespace Cw5.Services
     {
         EnrollStudentResponse EnrollStudent(EnrollStudentRequest req);
         PromoteStudentResponse PromoteStudent(PromoteStudentRequest req);
-
+        bool IsStudentExists(String StudentIndexNumber);
     }
 }
