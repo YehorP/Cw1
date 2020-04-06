@@ -30,7 +30,7 @@ namespace Cw5.Middlewares
                     httpContext.Request.Body.Position = 0;
                 }
                 using (StreamWriter writer = new StreamWriter(@"log.txt",true)) {
-                    writer.WriteLine(method +"\r\n"+Path+"\r\n"+bodyStr+"\r\n"+query+"\r\n");
+                    writer.WriteLine(method +"\r\n"+Path+"\r\n"+bodyStr+"\r\n"+query);
                     writer.Flush();
                 }
             }
