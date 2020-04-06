@@ -1,7 +1,7 @@
 POST
 /api/enrollments
 {
-"IndexNumber": "s5678912",
+"IndexNumber": "s5678911",
 "FirstName": "Andrzej",
 "LastName": "Malewski",
 "BirthDate": "1993-03-30",
@@ -11,7 +11,7 @@ POST
 POST
 /api/enrollments
 {
-"IndexNumber": "s5678911",
+"IndexNumber": "s5678912",
 "FirstName": "Andrzej",
 "LastName": "Malewski",
 "BirthDate": "1993-03-30",
