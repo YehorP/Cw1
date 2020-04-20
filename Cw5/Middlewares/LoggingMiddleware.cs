@@ -20,6 +20,7 @@ namespace Cw5.Middlewares
             if (httpContext.Request != null)
             {
                 httpContext.Request.EnableBuffering();
+                httpContext.Request.EnableBuffering();
                 String Path = httpContext.Request.Path;
                 String method = httpContext.Request.Method;
                 String query = httpContext.Request.QueryString.ToString();
@@ -33,6 +34,7 @@ namespace Cw5.Middlewares
                     writer.WriteLine(method +"\r\n"+Path+"\r\n"+bodyStr+"\r\n"+query);
                     writer.Flush();
                 }
+                httpContext.Request.Body.Seek(0, SeekOrigin.Begin);
             }
             await _next(httpContext);
         }
