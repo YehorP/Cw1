@@ -32,16 +32,7 @@ namespace Cw7.Controllers
             this.passwordService = passwordService;
             this.configuration = configuration;
         }
-        [HttpGet("students")]
-        [Authorize]
-        public IActionResult getStudents()
-        {
-            List<Student> list = new List<Student>();
-            list.Add(new Student { FirstName = "John", LastName = "Armstrong", BirthDate = DateTime.Now, IndexNumber = "s1234" });
-            list.Add(new Student { FirstName = "Bill", LastName = "Johnson", BirthDate = DateTime.Now, IndexNumber = "s43215" });
-            return Ok(list);
-        }
-
+        
         [HttpPost("promotions")]
         [Authorize]
         public IActionResult PromoteStudents(PromoteStudentRequest request)
@@ -52,6 +43,7 @@ namespace Cw7.Controllers
             else
                 return StatusCode(201,response);
         }
+
         [HttpPost]
         [Authorize]
         public IActionResult EnrollStudent(EnrollStudentRequest request)
