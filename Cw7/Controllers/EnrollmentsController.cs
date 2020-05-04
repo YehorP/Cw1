@@ -32,7 +32,7 @@ namespace Cw7.Controllers
             this.passwordService = passwordService;
             this.configuration = configuration;
         }
-        
+       
         [HttpPost("promotions")]
         [Authorize]
         public IActionResult PromoteStudents(PromoteStudentRequest request)
