@@ -276,7 +276,7 @@ namespace LinqConsoleApp
         public void Przyklad7()
         {
             Console.WriteLine("Przykład 7");
-            var res = Emps.Select(x => new { Praca = x.Job, LiczbaPracownikow = Emps.Where(y=>y.Job==x.Job).Count()}).ToList();
+            var res = Emps.Select(x => new { Praca = x.Job, LiczbaPracownikow = Emps.Where(y=>y.Job==x.Job).Count()}).Distinct().ToList();
             foreach (var element in res)
                 Console.WriteLine(element);
         }
