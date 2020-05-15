@@ -19,6 +19,23 @@ namespace Cw9.Controllers
         {
             this.dbService = dbService;
         }
+        [HttpPut("UpdateStudent")]
+        public IActionResult UpdateStudent(UpdateStudentRequest request)
+        {
+            if (dbService.UpdateStudent(request))
+                return Ok("Student data has benn changed");
+            else
+                return BadRequest("Wrong data was passed");
+        }
+
+        [HttpDelete("deleteStudent/{StudentIndexNumber}")]
+        public IActionResult DeleteStudent(string StudentIndexNumber)
+        {
+            if (dbService.DeleteStudent(StudentIndexNumber))
+                return Ok("Student was deleted");
+            else
+                return BadRequest("Wrong data was passed");
+        }
         [HttpGet("students")]
         public IActionResult GetStudentsList()
         {

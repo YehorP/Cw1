@@ -24,7 +24,7 @@ namespace Cw9.Services
         public bool IsStudentExists(String StudentIndexNumber)
         {
             
-            return dbContext.Student.Any()?dbContext.Student.Where(student=>student.IndexNumber==StudentIndexNumber).Count()>0:false;
+            return dbContext.Student.Any()?dbContext.Student.Where(student=>student.IndexNumber==StudentIndexNumber).FirstOrDefault()==null:false;
         }
         public PromoteStudentResponse PromoteStudent(PromoteStudentRequest request)
         {
@@ -38,13 +38,15 @@ namespace Cw9.Services
                                                 el2 => el2.IdStudy,
                                                 (el1, el2) => new { Semester = el1.Semester, el2.Name })
                                           .Where(el => el.Semester == request.Semester && el.Name == request.Studies)
-                                          .ToList();
-                if (enrollment.Count() == 0)
-                    return new PromoteStudentResponse { Name = "no such enrollment" };
+                                          .FirstOrDefault();
+                if (enrollment == null)
+                    return null;
 
                 SqlParameter param1 = new SqlParameter("@Study", request.Studies);
                 SqlParameter param2 = new SqlParameter("@Semester", request.Semester);
-                var tmpProc = dbContext.Enrollment.FromSqlRaw("exec PromoteStudents @Study,@Semester", param1, param2).ToList().SingleOrDefault();
+                var tmpProc = dbContext.Enrollment.FromSqlRaw("exec PromoteStudents @Study,@Semester", param1, param2)
+                                                   .ToList()
+                                                   .SingleOrDefault();
                 if (tmpProc == null)
                     return null;
 
@@ -55,11 +57,11 @@ namespace Cw9.Services
                     Semester = tmpProc.Semester,
                     Name = dbContext.Studies
                                   .Where(study => study.IdStudy == tmpProc.IdStudy)
-                                  .Select(study => study.Name).ToList().SingleOrDefault()
+                                  .Select(study => study.Name).FirstOrDefault()
                 };
             }
             catch (Exception ex) {
-                return null;
+                return new PromoteStudentResponse { Name=ex.ToString()};
             }
         }
 
@@ -69,13 +71,13 @@ namespace Cw9.Services
             {
                 if (IsStudentExists(request.IndexNumber) || !dbContext.Studies.Any())
                     return null;
-                var Study = dbContext.Studies.Where(study => study.Name == request.Studies).ToList();
-                if (Study.Count() == 0)
+                var Study = dbContext.Studies.Where(study => study.Name == request.Studies).FirstOrDefault();
+                if (Study == null)
                     return null;
 
-                int StudyId = Study[0].IdStudy;
-            var enrollment = dbContext.Enrollment.Any() ? dbContext.Enrollment.Where(en2 => en2.IdStudy == StudyId && en2.Semester == 1 && en2.StartDate == dbContext.Enrollment.Where(en => en.IdStudy == StudyId && en.Semester == 1).Max(en => en.StartDate)).ToList() : null;
-                if (enrollment!=null && enrollment.Count() > 0)
+                int StudyId = Study.IdStudy;
+            var enrollment = dbContext.Enrollment.Where(en2 => en2.IdStudy == StudyId && en2.Semester == 1 && en2.StartDate == dbContext.Enrollment.Where(en => en.IdStudy == StudyId && en.Semester == 1).Max(en => en.StartDate)).FirstOrDefault();
+                if (enrollment!=null )
                 {
                     var tmpStudent = new Student
                     {
@@ -83,26 +85,26 @@ namespace Cw9.Services
                         FirstName = request.FirstName,
                         LastName = request.LastName,
                         BirthDate = request.Birthdate,
-                        IdEnrollment = enrollment[0].IdEnrollment
+                        IdEnrollment = enrollment.IdEnrollment
                     };
 
                     dbContext.Add(tmpStudent);
                     dbContext.SaveChanges();
 
                     var Result = dbContext.Enrollment
-                                .Where(el => el.IdEnrollment == enrollment[0].IdEnrollment)
+                                .Where(el => el.IdEnrollment == enrollment.IdEnrollment)
                                 .Join(dbContext.Studies,
                                       (el1) => el1.IdStudy,
                                       (el2) => el2.IdStudy,
                                       (el1, el2) => new { IdEnrollment = el1.IdEnrollment, Semester = el1.Semester, StartDate = el1.StartDate, Study = el2.Name })
-                                .ToList();
+                                .FirstOrDefault();
 
                     return new EnrollStudentResponse
                     {
-                        IdEnrollment = Result[0].IdEnrollment,
-                        Study = Result[0].Study,
-                        StartDate = Result[0].StartDate,
-                        Semester = Result[0].Semester
+                        IdEnrollment = Result.IdEnrollment,
+                        Study = Result.Study,
+                        StartDate = Result.StartDate,
+                        Semester = Result.Semester
                     };
 
                 }
@@ -136,19 +138,19 @@ namespace Cw9.Services
                                      (el1) => el1.IdStudy,
                                      (el2) => el2.IdStudy,
                                      (el1, el2) => new { IdEnrollment = el1.IdEnrollment, Semester = el1.Semester, StartDate = el1.StartDate, Study = el2.Name })
-                               .ToList();
+                               .FirstOrDefault();
 
                     return new EnrollStudentResponse
                     {
-                        IdEnrollment = Result[0].IdEnrollment,
-                        Study = Result[0].Study,
-                        StartDate = Result[0].StartDate,
-                        Semester = Result[0].Semester
+                        IdEnrollment = Result.IdEnrollment,
+                        Study = Result.Study,
+                        StartDate = Result.StartDate,
+                        Semester = Result.Semester
                     };
                 }
             }
             catch (Exception ex) {
-                return null;
+                return new EnrollStudentResponse { Study = ex.ToString() };
             }
         }
 
@@ -156,5 +158,42 @@ namespace Cw9.Services
         {
             return dbContext.Student.ToList();
         }
+
+        public bool DeleteStudent(string StudentIndexNumber)
+        {
+            try
+            {
+                var student = dbContext.Student.Where(stud => stud.IndexNumber == StudentIndexNumber).FirstOrDefault();
+                if (student == null)
+                    return false;
+
+                dbContext.Student.Remove(student);
+                dbContext.SaveChanges();
+                return true;
+            }
+            catch (Exception ex) {
+                return false;
+            }
+        }
+
+        public bool UpdateStudent(UpdateStudentRequest request)
+        {
+            try
+            {
+                var student = dbContext.Student.Where(student => student.IndexNumber == request.IndexNumber).FirstOrDefault();
+                if (student == null)
+                    return false;
+
+                student.FirstName = request.FirstName;
+                student.LastName = request.LastName;
+                student.IdEnrollment = request.IdEnrollment;
+                student.BirthDate = request.BirthDate;
+                dbContext.SaveChanges();
+                return true;
+            }
+            catch (Exception ex) {
+                return false;
+            }
+        }
     }
-    }
+}

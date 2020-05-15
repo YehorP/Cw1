@@ -14,5 +14,8 @@ namespace Cw9.Services
         EnrollStudentResponse EnrollStudent(EnrollStudentRequest req);
         PromoteStudentResponse PromoteStudent(PromoteStudentRequest req);
         bool IsStudentExists(String StudentIndexNumber);
+
+        bool DeleteStudent(String StudentIndexNumber);
+        bool UpdateStudent(UpdateStudentRequest request);
     }
 }
